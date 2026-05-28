@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f7;padding:16px;font-size:12px;color:#1a1a2e}
+h1{text-align:center;font-size:17px;font-weight:800;margin-bottom:3px}
+.subtitle{text-align:center;font-size:11px;color:#666;margin-bottom:14px}
+
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:8px 8px 0 0;cursor:pointer;font-size:11px;font-weight:600;background:#dde1ee;color:#555;border:2px solid transparent;border-bottom:none}
+.tab.active{background:white;color:#1a1a2e;border-color:#c5cae0}
+.tab:hover:not(.active){background:#c8cddf}
+.panel{display:none;background:white;border-radius:0 8px 8px 8px;border:2px solid #c5cae0;padding:20px}
+.panel.active{display:block}
+
+/* SEKCJE */
+.sec-title{font-size:13px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;border-bottom:2px solid #f0f2f7;padding-bottom:6px}
+.badge{font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px}
+
+/* OPCJE */
+.options-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.opt{border-radius:8px;padding:14px;border:2px solid}
+.opt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.opt-title{font-size:12px;font-weight:700}
+.opt-verdict{font-size:10px;font-weight:700;padding:2px 9px;border-radius:10px}
+.opt-body{font-size:11px;color:#555;line-height:1.6}
+
+/* UZASADNIENIE */
+.rat-box{border-left:4px solid;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:12px;font-size:11px;line-height:1.7}
+
+/* SEKWENCJA */
+.seq{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:12px 0}
+.seq-box{border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;text-align:center;border:2px solid;flex:1;min-width:120px}
+.seq-arrow{font-size:18px;color:#9ca3af;padding:0 6px;flex-shrink:0}
+
+/* PILOTY */
+.pilot-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.pilot-card{border-radius:10px;overflow:hidden;border:2px solid}
+.pilot-head{padding:12px 14px;color:white}
+.pilot-num{font-size:10px;font-weight:700;opacity:.85;letter-spacing:.5px;margin-bottom:3px}
+.pilot-name{font-size:13px;font-weight:800}
+.pilot-tag{font-size:10px;opacity:.9;margin-top:2px}
+.pilot-body{padding:12px 14px;background:white}
+.prow{margin-bottom:9px}
+.plabel{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#888;margin-bottom:2px}
+.pval{font-size:11px;color:#333;line-height:1.5}
+.check-list{list-style:none;padding:0}
+.check-list li{font-size:10px;color:#333;padding:2px 0;display:flex;gap:5px;align-items:flex-start}
+.check-list li::before{content:"✓";color:#16a34a;font-weight:800;flex-shrink:0;margin-top:1px}
+.warn-list li::before{content:"⚠";color:#d97706}
+.cross-list li::before{content:"✗";color:#dc2626}
+.kpi-tag{display:inline-block;background:#fef9c3;color:#854d0e;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;margin:2px 2px 0 0}
+.owner-tag{display:inline-block;background:#e0f2fe;color:#0c4a6e;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;margin:2px 2px 0 0}
+.score-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px;margin-left:4px}
+
+/* 12-PUNKT CHECKLIST */
+.check12-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.c12-row{display:flex;gap:6px;align-items:flex-start;padding:6px 8px;border-radius:6px;background:#f8f9ff;border:1px solid #e0e4f0}
+.c12-icon{font-size:14px;flex-shrink:0}
+.c12-title{font-size:10px;font-weight:700;color:#1a1a2e}
+.c12-val{font-size:10px;color:#555;line-height:1.4}
+
+/* NIE-LISTA */
+.nie-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nie-row{display:flex;gap:6px;align-items:flex-start;padding:6px 8px;border-radius:6px}
+.nie-ok{background:#f0fdf4;border:1px solid #bbf7d0}
+.nie-ok .nie-icon::before{content:"✓";color:#16a34a;font-weight:800}
+.nie-title{font-size:10px;font-weight:700}
+.nie-val{font-size:10px;color:#555;line-height:1.4}
+
+/* INFO BOXES */
+.info-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.info-box{flex:1;min-width:120px;background:#f8f9ff;border-radius:8px;padding:10px;border:1px solid #e0e4f0;text-align:center}
+.info-num{font-size:20px;font-weight:800}
+.info-lbl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px}
+.info-sub{font-size:10px;color:#666;margin-top:2px}
+
+.warn-box{background:#fef3c7;border-left:4px solid #d97706;border-radius:0 8px 8px 0;padding:10px 14px;font-size:11px;line-height:1.7;color:#451a03;margin-top:10px}
+.green-box{background:#f0fdf4;border-left:4px solid #16a34a;border-radius:0 8px 8px 0;padding:10px 14px;font-size:11px;line-height:1.7;color:#14532d;margin-top:10px}
+
+@media(max-width:600px){.options-grid,.pilot-grid,.check12-grid,.nie-grid{grid-template-columns:1fr}.seq{flex-direction:column}}
+</style>
+</head>
+<body>
+<h1>Wybór rekomendowanego rozwiązania — AutoPartner Max S.A.</h1>
+<p class="subtitle">a. Rekomendowane działanie · b. Wybór inicjatyw do pilota z uzasadnieniem · wg zasad Pilota Idealnego z kursu</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="show(0)">🎯 a. Rekomendowane działanie</div>
+  <div class="tab" onclick="show(1)">🚀 b. Piloty — wybór i uzasadnienie</div>
+  <div class="tab" onclick="show(2)">✅ Weryfikacja: 12 cech pilota idealnego</div>
+  <div class="tab" onclick="show(3)">❌ Lista NIE — czego nie robimy</div>
+</div>
+
+<!-- ===== TAB A: REKOMENDOWANE DZIAŁANIE ===== -->
+<div class="panel active" id="p0">
+  <div class="sec-title"><span>🎯</span> a. Co rekomendujemy — jeden projekt, zestaw pilotów czy pełna transformacja?</div>
+
+  <div class="options-grid">
+    <div class="opt" style="border-color:#dc2626;background:#fef2f2">
+      <div class="opt-header">
+        <div class="opt-title">Opcja 1: Jeden projekt</div>
+        <div class="opt-verdict" style="background:#dc2626;color:white">❌ NIE</div>
+      </div>
+      <div class="opt-body">Wybrać jeden projekt i skupić całe zasoby. Czekać na wynik zanim zaczniemy kolejny. Może to być np. tylko Bramka Marżowa lub tylko Follow-up.</div>
+      <div style="margin-top:8px;font-size:10px;font-weight:700;color:#dc2626">Dlaczego nie: AutoPartner Max ma kilka równoległych, niezależnych bolączek w procesie sprzedażowym — od wpływu zapytania po follow-up. Jeden projekt rozwiąże 1 problem i rozczaruje resztę stakeholderów. Firma traci marżę każdego dnia.</div>
+    </div>
+
+    <div class="opt" style="border-color:#16a34a;background:#f0fdf4">
+      <div class="opt-header">
+        <div class="opt-title">Opcja 2: Zestaw pilotów jako wejście do transformacji</div>
+        <div class="opt-verdict" style="background:#16a34a;color:white">✅ TAK</div>
+      </div>
+      <div class="opt-body">3 skoordynowane, małe piloty realizowane w szybkiej sekwencji (tygodnie 1–10). Każdy niezależny technicznie, każdy z osobnym właścicielem, każdy destined for success. Równolegle — fundament danych pod przyszłe projekty.</div>
+      <div style="margin-top:8px;font-size:10px;font-weight:700;color:#16a34a">Dlaczego tak: Każdy pilot trafia w innego stakeholdera. Razem tworzą zamknięty cykl ofertowy. Razem przekonają zarząd do pełnej transformacji — bo każdy z osobna jest bułką z masłem.</div>
+    </div>
+
+    <div class="opt" style="border-color:#d97706;background:#fffbeb">
+      <div class="opt-header">
+        <div class="opt-title">Opcja 3: Pełna transformacja od razu</div>
+        <div class="opt-verdict" style="background:#d97706;color:white">🕐 NIE TERAZ</div>
+      </div>
+      <div class="opt-body">Startować od razu z programem transformacji 18 projektów, Data Warehouse, rekrutacją Data Scientista, governance i strukturą AI w całej organizacji.</div>
+      <div style="margin-top:8px;font-size:10px;font-weight:700;color:#d97706">Dlaczego nie teraz: Organizacja nie ma gotowości danych (brak DWH), brak kompetencji DS, brak zaufania wewnętrznego do AI ("centrala nie zna lokalnego klienta"). Transformacja bez pilotów = "wielki projekt IT na dwa lata". Budujemy do niej drogę przez piloty.</div>
+    </div>
+  </div>
+
+  <div class="rat-box" style="background:#f0fdf4;border-color:#16a34a;color:#14532d">
+    <strong>Rekomendacja końcowa:</strong> Realizujemy <strong>zestaw 3 skoordynowanych pilotów</strong> jako wejście do pełnej transformacji AI. Piloty startują w tygodniach 1–10, są od siebie niezależne technicznie i każdy ma jasnego właściciela biznesowego. Równolegle przygotowujemy fundament danych (czyszczenie katalogu, standaryzacja CRM, mapowanie kosztów logistyki) — bez niego projekty Fazy 2–3 nie będą możliwe. Pełna transformacja wchodzi w roku 2, gdy organizacja zobaczy wyniki i uwierzy, że AI działa.
+  </div>
+
+  <div class="sec-title" style="margin-top:16px"><span>📅</span> Sekwencja działań — od pilotów do transformacji</div>
+  <div class="seq">
+    <div class="seq-box" style="border-color:#16a34a;color:#15803d">
+      Tygodnie 1–8<br/>
+      <span style="font-weight:400;font-size:10px">🚦 Bramka marżowa LIVE<br/>📬 Follow-up LLM LIVE</span>
+    </div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-box" style="border-color:#2563eb;color:#1d4ed8">
+      Tygodnie 4–12<br/>
+      <span style="font-weight:400;font-size:10px">📦 Stany ERP API LIVE<br/>pierwsze KPI widoczne</span>
+    </div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-box" style="border-color:#7c3aed;color:#7c3aed">
+      Miesiące 4–9<br/>
+      <span style="font-weight:400;font-size:10px">Skalowanie pilotów<br/>Elasticsearch, blokada</span>
+    </div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-box" style="border-color:#d97706;color:#b45309">
+      Rok 2+<br/>
+      <span style="font-weight:400;font-size:10px">Prognoza popytu<br/>Dashboard zarządczy</span>
+    </div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-box" style="border-color:#374151;color:#374151">
+      Rok 2–3<br/>
+      <span style="font-weight:400;font-size:10px">Pełna transformacja<br/>CAIO + 18 projektów</span>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-box"><div class="info-num" style="color:#16a34a">3</div><div class="info-lbl">piloty startowe</div><div class="info-sub">każdy niezależny</div></div>
+    <div class="info-box"><div class="info-num" style="color:#d97706">200–380k PLN</div><div class="info-lbl">budżet Fazy 1</div><div class="info-sub">jednorazowy</div></div>
+    <div class="info-box"><div class="info-num" style="color:#2563eb">6–8 tyg.</div><div class="info-lbl">pierwsze wyniki</div><div class="info-sub">przed kolejnym kwartalem</div></div>
+    <div class="info-box"><div class="info-num" style="color:#7c3aed">24 mc</div><div class="info-lbl">do pełnej transformacji</div><div class="info-sub">przez piloty</div></div>
+    <div class="info-box"><div class="info-num" style="color:#dc2626">18</div><div class="info-lbl">projektów w roadmapie</div><div class="info-sub">5 z nich to piloty</div></div>
+  </div>
+</div>
+
+<!-- ===== TAB B: PILOTY ===== -->
+<div class="panel" id="p1">
+  <div class="sec-title"><span>🚀</span> b. Wybrane inicjatywy do pilota — uzasadnienie</div>
+
+  <div class="pilot-grid">
+
+    <!-- PILOT 1: Bramka Marżowa -->
+    <div class="pilot-card" style="border-color:#16a34a">
+      <div class="pilot-head" style="background:linear-gradient(135deg,#15803d,#16a34a)">
+        <div class="pilot-num">PILOT #1 · START NATYCHMIAST · Assessment score: 92/100</div>
+        <div class="pilot-name">🚨 Bramka Marżowa</div>
+        <div class="pilot-tag">Rules engine · 6–8 tygodni · 40–80k PLN · Build</div>
+      </div>
+      <div class="pilot-body">
+        <div class="prow">
+          <div class="plabel">Dlaczego właśnie ten projekt?</div>
+          <div class="pval">Najwyższy score w assessment (92 pkt). Marża spada trzeci rok z rzędu — to priorytet #1 CFO i CEO. Rules engine jest deterministyczny: zawsze poprawna odpowiedź, zero ryzyka halucynacji LLM. Najtańszy i najszybszy z listy, który rozwiązuje bolączkę najważniejszego stakeholdera. Nie może się nie udać.</div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Właściciel biznesowy</div>
+          <div><span class="owner-tag">Joanna — CFO</span><span class="owner-tag">Bartek — Analytics</span></div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Zakres pilota (wąski!)</div>
+          <div class="pval">Kategoria: klocki i tarcze hamulcowe. 3 oddziały regionu mazowieckiego. Shadow mode 2 tyg. → live 4 tyg.</div>
+        </div>
+        <div class="prow">
+          <div class="plabel">KPI — ustawione nisko</div>
+          <div><span class="kpi-tag">Alert poprawny >90%</span><span class="kpi-tag">Marża pilota +1 pp / 60 dni</span><span class="kpi-tag">0 skarg handlowców</span></div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Dlaczego destined for success?</div>
+          <ul class="check-list">
+            <li>Rules engine = deterministyczny, zawsze poprawny</li>
+            <li>Dane o rabatach już są w ERP — brak czyszczenia</li>
+            <li>Shadow mode przez 2 tyg. zanim trafi do handlowców</li>
+            <li>Handlowiec może zignorować alert — zero przymusu</li>
+            <li>Joanna aktywnie tego chce i będzie sponsorem</li>
+          </ul>
+        </div>
+        <div class="prow">
+          <div class="plabel">Jak to skalujemy po sukcesie?</div>
+          <div class="pval">Konfiguracja → rollout na 186 oddziałów = 2 tygodnie. Żadnego dodatkowego kodu.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILOT 2: Follow-up LLM -->
+    <div class="pilot-card" style="border-color:#7c3aed">
+      <div class="pilot-head" style="background:linear-gradient(135deg,#6d28d9,#7c3aed)">
+        <div class="pilot-num">PILOT #2 · TYDZIEŃ 1–6 · Assessment score: 90/100</div>
+        <div class="pilot-name">📬 Auto Follow-up LLM</div>
+        <div class="pilot-tag">No-code (Make.com) · 4–6 tygodni · 30–60k PLN · Buy</div>
+      </div>
+      <div class="pilot-body">
+        <div class="prow">
+          <div class="plabel">Dlaczego właśnie ten projekt?</div>
+          <div class="pval">Najtańszy i najszybszy z całej listy 18. Do 40% ofert przepada bez jakiegokolwiek follow-up — bolączka odczuwalna codziennie przez każdego handlowca i managera. Wyniki widoczne w ciągu 30 dni. Realizowany no-code (Make.com) — Bartek może to skonfigurować bez działu IT. Klasyczny "bułka z masłem" z listy pilotów z kursu: automatyzacja skrzynki mailowej.</div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Właściciel biznesowy</div>
+          <div><span class="owner-tag">Rafał — Dyrektor Sprzedaży</span><span class="owner-tag">Adam — Region</span></div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Zakres pilota (wąski!)</div>
+          <div class="pval">1 oddział (50–80 ofert/tydzień). A/B: 50% ofert z auto follow-up vs 50% bez. Platforma: Make.com.</div>
+        </div>
+        <div class="prow">
+          <div class="plabel">KPI — ustawione nisko</div>
+          <div><span class="kpi-tag">Oferty bez follow-up −50%</span><span class="kpi-tag">Konwersja +8% / 30 dni</span><span class="kpi-tag">System działa 30 dni bez błędów</span></div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Dlaczego destined for success?</div>
+          <ul class="check-list">
+            <li>No-code = brak ryzyka technicznego</li>
+            <li>Make.com + LLM API = gotowe w tydzień</li>
+            <li>Follow-up sam w sobie podnosi konwersję — branżowy benchmark +8–15%</li>
+            <li>Prerequisite: standaryzacja statusów CRM (plan 30 dni — Bartek + Rafał)</li>
+            <li>Rafał aktywnie chce — to jego KPI sprzedażowy</li>
+          </ul>
+        </div>
+        <div class="prow">
+          <div class="plabel">Jak to skalujemy po sukcesie?</div>
+          <div class="pval">Kopia konfiguracji Make.com → drugi oddział → kolejne. Skalowanie w dniach, nie tygodniach.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILOT 3: Stany ERP API -->
+    <div class="pilot-card" style="border-color:#2563eb">
+      <div class="pilot-head" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">
+        <div class="pilot-num">PILOT #3 · TYDZIEŃ 3–7 · Assessment score: 90/100</div>
+        <div class="pilot-name">📦 Stany ERP — API realtime</div>
+        <div class="pilot-tag">API integracja · 3–5 tygodni · 20–40k PLN · Build API</div>
+      </div>
+      <div class="pilot-body">
+        <div class="prow">
+          <div class="plabel">Dlaczego właśnie ten projekt?</div>
+          <div class="pval">Drugi najtańszy projekt z całej listy (20–40k PLN) i jeden z najszybszych (3–5 tyg.). Handlowiec sprawdza stany magazynowe ręcznie logując się do ERP kilkanaście razy dziennie — stracony czas i błędy dostępności w ofertach. Ten projekt jest fundamentem technicznym dla Elasticsearch (#5) i AI Asystenta — bez API do ERP nic nie działa. Budujemy fundament i przy okazji rozwiązujemy konkretną bolączkę.</div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Właściciel biznesowy</div>
+          <div><span class="owner-tag">Paweł — IT</span><span class="owner-tag">Wojtek — Logistyka</span></div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Zakres pilota (wąski!)</div>
+          <div class="pval">API do stanów dla top 50k SKU z 3 oddziałów pilotowych. Widget w CRM obok wyszukiwania. Cache 5-minutowy.</div>
+        </div>
+        <div class="prow">
+          <div class="plabel">KPI — ustawione nisko</div>
+          <div><span class="kpi-tag">Czas sprawdzenia stanu: z 3 min → <1 sek.</span><span class="kpi-tag">Oferty z błędną dostępnością: −70%</span><span class="kpi-tag">API uptime >99%</span></div>
+        </div>
+        <div class="prow">
+          <div class="plabel">Dlaczego destined for success?</div>
+          <ul class="check-list">
+            <li>Deterministyczny — jeśli ERP ma dane, API je zwróci poprawnie</li>
+            <li>Bardzo prosta integracja (REST API + cache Redis)</li>
+            <li>Paweł IT jako owner = bezpośredni dostęp do systemu</li>
+            <li>Dane w ERP są dobre — najwyżej oceniane źródło danych</li>
+            <li>Fundament pod #5 Elasticsearch i AI Asystenta w Fazie 2</li>
+          </ul>
+        </div>
+        <div class="prow">
+          <div class="plabel">Jak to skalujemy po sukcesie?</div>
+          <div class="pval">Rozszerzenie API na wszystkie 420k SKU i wszystkie 186 oddziałów = konfiguracja, nie nowy projekt.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="warn-box">
+    <strong>⚠️ Czego NIE robimy w fazie pilota:</strong> Nie startujemy z Prognozą Popytu (#18 — brak DS + brak DWH + brudne dane historyczne = 4 blokery), Dashboardem Zarządczym (brak DWH, 18–24 mc), Agregacją Dostawców (#7 — onboarding partnerów trwa kwartałami) ani Order Automation (#16 — ERP-WMS integracja zbyt złożona). Równolegle przez pierwsze 8 tygodni czyścimy top 50k SKU katalogu i standaryzujemy statusy CRM — to inwestycja w fundament danych pod Fazę 2.
+  </div>
+
+  <div class="green-box">
+    <strong>💡 Dlaczego akurat te 3 piloty razem?</strong> Bramka Marżowa chroni rentowność (CFO). Follow-up domyka konwersję (Sprzedaż). Stany ERP budują fundament pod dalsze projekty (IT + Logistyka). Każdy trafia w innego stakeholdera, każdy jest niezależny technicznie — ale razem tworzą logiczną całość: <em>zapytanie → stan dostępny od razu → oferta z poprawną marżą → follow-up który domknie transakcję</em>.
+  </div>
+</div>
+
+<!-- ===== TAB C: 12 CECH PILOTA IDEALNEGO ===== -->
+<div class="panel" id="p2">
+  <div class="sec-title"><span>✅</span> Weryfikacja wg 12 cech pilota idealnego z materiałów kursu</div>
+  <p style="font-size:11px;color:#555;margin-bottom:12px">Każdy z 3 pilotów zweryfikowany pod kątem listy TAK z kursu. Ocena dla każdego z 3 pilotów.</p>
+
+  <div class="check12-grid">
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">1. Mały</div>
+        <div class="c12-val">
+          <strong>#1 Bramka:</strong> 3 oddziały, 1 kategoria ✓<br/>
+          <strong>#2 Follow-up:</strong> 1 oddział, 50–80 ofert/tydzień ✓<br/>
+          <strong>#3 Stany ERP:</strong> 50k SKU, 3 oddziały ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">2. Tani</div>
+        <div class="c12-val">
+          <strong>#1:</strong> 40–80k PLN ✓ (najtańszy z listy)<br/>
+          <strong>#2:</strong> 30–60k PLN ✓ (no-code = minimum kosztu)<br/>
+          <strong>#3:</strong> 20–40k PLN ✓ (najtańszy z 18)
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">3. Jasny zakres</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Alert marżowy w momencie zapisu oferty ✓<br/>
+          <strong>#2:</strong> Auto-mail/SMS po X h bez odpowiedzi ✓<br/>
+          <strong>#3:</strong> Widget ze stanem w CRM przy wyszukiwaniu ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">4. Jasny miernik sukcesu — ustawiony nisko</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Alert poprawny >90%, marża +1 pp ✓<br/>
+          <strong>#2:</strong> Konwersja +8%, system działa 30 dni ✓<br/>
+          <strong>#3:</strong> Czas sprawdzenia <1 sek., uptime >99% ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">5. Rozwiązuje bolączkę</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Marża spada 3 rok — CFO + CEO bolą ✓<br/>
+          <strong>#2:</strong> 40% ofert bez follow-up = utracona sprzedaż ✓<br/>
+          <strong>#3:</strong> Kilkanaście logowań/dzień do ERP = strata czasu ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">6. Jeden proces / departament</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Dział Sprzedaży, moment tworzenia oferty ✓<br/>
+          <strong>#2:</strong> Dział Sprzedaży, etap follow-up ✓<br/>
+          <strong>#3:</strong> IT + Sprzedaż, etap wyszukiwania SKU ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">7. Jasny właściciel biznesowy</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Joanna (CFO) — aktywnie chce, sponsor ✓<br/>
+          <strong>#2:</strong> Rafał (Sprzedaż) — jego KPI ✓<br/>
+          <strong>#3:</strong> Paweł (IT) — bezpośredni dostęp ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">8. Dostęp do danych</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Dane ERP (rabaty, ceny zakupu) — gotowe ✓<br/>
+          <strong>#2:</strong> Statusy CRM — wymagają standaryzacji (plan 30 dni) ⚠<br/>
+          <strong>#3:</strong> ERP API — dostępne, Paweł potwierdził ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">9. Prosty i DESTINED FOR SUCCESS</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Rules engine = deterministyczny, 100% poprawny ✓<br/>
+          <strong>#2:</strong> Tysiące firm to zrobiło w Make.com ✓<br/>
+          <strong>#3:</strong> REST API + cache = standardowe rozwiązanie ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">10. Buy / finetune nie Build</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Rules engine (Build, ale trivialny — 2 dni dev) ✓<br/>
+          <strong>#2:</strong> Make.com (Buy no-code) ✓ ← klasyczny Buy<br/>
+          <strong>#3:</strong> REST API (Build prostego connectora) ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟡</div>
+      <div>
+        <div class="c12-title">11. Z "fajnym twistem" (nice to have)</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Alert w kolorze — handlowiec WIDZI marżę live ✓<br/>
+          <strong>#2:</strong> LLM personalizuje treść follow-up ✓<br/>
+          <strong>#3:</strong> Stan z kodem lokalizacji (Magazyn Warszawa P3/7) ✓
+        </div>
+      </div>
+    </div>
+    <div class="c12-row">
+      <div class="c12-icon">🟢</div>
+      <div>
+        <div class="c12-title">12. Łatwy do wyskalowania</div>
+        <div class="c12-val">
+          <strong>#1:</strong> Rollout na 186 oddziałów = konfiguracja ✓<br/>
+          <strong>#2:</strong> Kopia konfiguracji Make.com per oddział ✓<br/>
+          <strong>#3:</strong> API layer = fundament dla całej Fazy 2 ✓
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="green-box">
+    <strong>Wynik weryfikacji:</strong> Wszystkie 3 piloty spełniają 11–12 z 12 kryteriów. Jedyne ⚠ to statusy CRM dla Pilota #2 — ale plan standaryzacji jest gotowy (plan 30 dni danych) i nie blokuje startu. Według zasad kursu: <em>pilot ma być bułką z masłem</em> — i takie właśnie są.
+  </div>
+</div>
+
+<!-- ===== TAB D: LISTA NIE ===== -->
+<div class="panel" id="p3">
+  <div class="sec-title"><span>❌</span> Lista NIE — czego nie robimy w fazie pilota (wg kursu)</div>
+  <p style="font-size:11px;color:#555;margin-bottom:12px">Materiały kursu: lista zakazów pilota. Sprawdzamy każdy punkt dla naszych 3 pilotów.</p>
+
+  <div class="nie-grid">
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">1. Bez zwolnień</div>
+        <div class="c12-val">Żaden z 3 pilotów nie zastępuje stanowisk. Bramka wspomaga CFO, follow-up automatyzuje powtarzalną czynność, stany ERP eliminują logowania — nie eliminują ludzi. Komunikat jasny od dnia 1.</div>
+      </div>
+    </div>
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">2. Bez polityki wewnętrznej</div>
+        <div class="c12-val">Bramka Marżowa: CFO chce. Follow-up: Rafał chce. Stany ERP: Paweł chce. Żaden projekt nie jest w konflikcie z żadnym działem. Brak "kto zarządza AI" jako kwestii spornej na tym etapie.</div>
+      </div>
+    </div>
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">3. Nie bierzemy wielkiego problemu</div>
+        <div class="c12-val">Nie robimy Dashboardu Zarządczego (całe 8 systemów naraz), Prognozy Popytu (420k SKU + DWH) ani Order Automation (ERP+WMS+fakturowanie). To są wielkie projekty — na lata 2–3.</div>
+      </div>
+    </div>
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">4. Nie bierzemy najbardziej skomplikowanego problemu</div>
+        <div class="c12-val">Projekt #18 (Predykcje ML) to najbardziej ambitny projekt z listy: 4 blokery, DWH, DS, czyste dane historyczne. Assessment: 54/100. Trafia do Fazy 3 roadmapy.</div>
+      </div>
+    </div>
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">5. Nie zawyżamy oczekiwań</div>
+        <div class="c12-val">KPI pilotów ustawione celowo nisko: +1 pp marży (nie +5), +8% konwersji (nie +50%), >90% accuracy alertu (nie 100%). Komunikat do zarządu: "pilot ma pokazać kierunek, nie uratować firmy".</div>
+      </div>
+    </div>
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">6. Nie angażujemy zespołu antytechnicznego</div>
+        <div class="c12-val">Piloty startują z Tomaszem (Senior Handlowiec, otwarty na narzędzia), Bartkiem (Analytics, techniczny), Pawłem (IT, właściciel systemu) i Rafałem (Sprzedaż, zmotywowany KPI). Żaden z nich nie jest antytechniczny.</div>
+      </div>
+    </div>
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">7. Nie bierzemy projektów ryzykownych</div>
+        <div class="c12-val">Bramka: deterministyczny rules engine (0% ryzyka halucynacji). Follow-up: no-code z opt-out (0% ryzyka technicznego). Stany ERP: REST API + cache (0% ryzyka). Każdy pilot ma shadow mode lub A/B przed livem.</div>
+      </div>
+    </div>
+    <div class="c12-row nie-ok">
+      <div class="c12-icon">✓</div>
+      <div>
+        <div class="c12-title">Bonus: nie mierzymy sukcesu "wdrożeniem AI"</div>
+        <div class="c12-val">KPI są biznesowe: marża, konwersja, czas sprawdzenia stanu. Nigdzie nie mówimy "wdrożyliśmy 3 projekty AI" jako miernik sukcesu. Mówimy "marża wzrosła o 1 pp w pilotowych oddziałach".</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="green-box" style="margin-top:14px">
+    <strong>Wniosek z weryfikacji listy NIE:</strong> Wszystkie 7 punktów zaliczone. Żaden z 3 pilotów nie narusza zasad z kursu. To jest dokładnie to, co materiały opisują jako idealny pilot: mały, bezpieczny, z jasnym właścicielem, bez polityki, destined for success. <strong>Piloty są bułką z masłem — i właśnie o to chodzi.</strong>
+  </div>
+</div>
+
+<script>
+function show(idx){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+}
+</script>
+</body>
+</html>
